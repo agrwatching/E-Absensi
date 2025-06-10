@@ -10,8 +10,8 @@ $stmt->execute([$username]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if ($user && password_verify($password, $user['password'])) {
-    $_SESSION['id_user'] = $user['id_user'];           // <-- pastikan ini diset
-    $_SESSION['username'] = $user['username'];    // <-- ini juga
+    $_SESSION['id_user'] = $user['id_user'];
+    $_SESSION['username'] = $user['username'];
     header("Location: sidebar.php");
     exit;
 } else {
