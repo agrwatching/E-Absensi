@@ -64,8 +64,10 @@ try {
     $db->exec("
         CREATE TABLE IF NOT EXISTS user (
             id_user INTEGER PRIMARY KEY AUTOINCREMENT,
+            nama_lengkap TEXT NOT NULL,
             username TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL
+            password TEXT NOT NULL,
+            foto_profil TEXT NOT NULL
         )
     ");
 
@@ -76,11 +78,10 @@ try {
         $stmt->execute([$nama]);
     }
 
-    // Tambahkan user default (guru)
     $cekUser = $db->query("SELECT COUNT(*) FROM user")->fetchColumn();
     if ($cekUser == 0) {
         $username = 'guru';
-        $password = password_hash('12345', PASSWORD_DEFAULT);
+        $password = password_hash('guru123', PASSWORD_DEFAULT);
         $db->prepare("INSERT INTO user (username, password) VALUES (?, ?)")->execute([$username, $password]);
     }
 
