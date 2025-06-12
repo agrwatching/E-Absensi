@@ -35,11 +35,10 @@ if (isset($_FILES['foto_profil']) && $_FILES['foto_profil']['error'] === UPLOAD_
     $tujuan = __DIR__ . '/../uploads/' . $namaBaru;
 
     if (move_uploaded_file($_FILES['foto_profil']['tmp_name'], $tujuan)) {
-        // Hapus foto lama jika bukan default
         if (!empty($foto_profil) && $foto_profil !== 'user.png') {
             @unlink(__DIR__ . '/../uploads/' . $foto_profil);
         }
-        $foto_profil = $namaBaru;
+        $foto_profil = $namaBaru; // << Ini penting
     }
 }
 

@@ -85,7 +85,7 @@ $currentPage = $_GET['page'] ?? 'home';
 
         <!-- Master Data -->
         <!-- Sidebar Menu -->
-<a href="dashboard.php?page=info_siswa" class="block px-6 py-3 w-full border-b border-gray-800 <?= isActive('info_siswa', $currentPage) ?>">🧑‍🎓 Kelola Siswa</a>
+<a href="dashboard.php?page=info_siswa" class="block px-6 py-3 w-full border-b border-gray-800 <?= isActive('info_siswa', $currentPage) ?>">🧑‍🎓 Info Siswa</a>
 <a href="dashboard.php?page=absensi" class="block px-6 py-3 w-full border-b border-gray-800 <?= isActive('absensi', $currentPage) ?>">📝 Absensi</a>
 <a href="dashboard.php?page=rekap_absensi" class="block px-6 py-3 w-full border-b border-gray-800 <?= isActive('rekap_absensi', $currentPage) ?>">📋 Rekap Absensi</a>
 <a href="dashboard.php?page=backup" class="block px-6 py-3 w-full border-b border-gray-800 <?= isActive('backup', $currentPage) ?>">📤 Backup data</a>
@@ -99,12 +99,47 @@ $currentPage = $_GET['page'] ?? 'home';
         <!-- Halaman Landingpage yg di tampilkan -->
         <?php
         $page = $_GET['page'] ?? 'home';
-        $file = "layouts/" . ($page === 'home' ? 'dashboard' : $page) . ".php";
-        if (file_exists($file)) {
-          include $file;
+
+        $found = false;
+
+        // Jika page mengandung slash (misalnya: "SiswaController/tambah_siswa")
+        if (str_contains($page, '/')) {
+            $file = $page . ".php";
+            //hidupkan echo di bawah jika terjadi eror file tidak ditemukan untuk mengecek
+            // echo "<pre>Langsung CEK FILE: $file</pre>";
+            if (file_exists($file)) {
+                include $file;
+                $found = true;
+            } else {
+                echo "<pre>TIDAK DITEMUKAN</pre>";
+            }
         } else {
-          echo "<h2 class='text-xl font-bold'>404 - Halaman tidak ditemukan</h2>";
+            // Jika page cuma nama file biasa, cek di dalam folder yang diizinkan
+            $allowed_paths = [
+                'layouts/',
+                'SiswaController/',
+                'AbsensiController/',
+                'RekapAbsensiController/'
+            ];
+
+            foreach ($allowed_paths as $path) {
+                $file = $path . ($page === 'home' ? 'dashboard' : $page) . ".php";
+                //hidupkan echo di bawah jika terjadi eror file tidak ditemukan untuk mengecek
+                // echo "<pre>CEK FILE: $file</pre>";
+                if (file_exists($file)) {
+                    include $file;
+                    $found = true;
+                    break;
+                } else {
+                    echo "<pre>TIDAK DITEMUKAN</pre>";
+                }
+            }
         }
+
+        if (!$found) {
+            echo "<h2 class='text-xl font-bold'>404 - Halaman tidak ditemukan</h2>";
+        }
+
         ?>
       </main>
     </div>
@@ -125,20 +160,32 @@ window.addEventListener('DOMContentLoaded', () => {
 //mode malam
 
 // Simpan otomatis setiap kali pengguna mengetik
-document.querySelectorAll('input, textarea, select').forEach(el => {
-  el.addEventListener('input', () => {
-    localStorage.setItem(el.name, el.value);
-  });
-});
+ const excludedPages = ["tambah_siswa", "edit_siswa", "tambah_kelas"];
+const currentPage = "<?= $_GET['page'] ?? '' ?>";
+const pageName = currentPage.split('/').pop(); // ambil bagian terakhir setelah slash
 
-// Ambil nilai saat halaman dimuat
-window.addEventListener('load', () => {
+if (!excludedPages.includes(pageName)) {
   document.querySelectorAll('input, textarea, select').forEach(el => {
-    if (localStorage.getItem(el.name)) {
-      el.value = localStorage.getItem(el.name);
-    }
+    el.addEventListener('input', () => {
+      localStorage.setItem(el.name, el.value);
+    });
   });
-});
+
+  window.addEventListener('load', () => {
+    document.querySelectorAll('input, textarea, select').forEach(el => {
+      if (localStorage.getItem(el.name)) {
+        el.value = localStorage.getItem(el.name);
+      }
+    });
+  });
+} else {
+  // Bersihkan isi localStorage yang tersimpan (jika perlu)
+  window.addEventListener('load', () => {
+    document.querySelectorAll('input, textarea, select').forEach(el => {
+      localStorage.removeItem(el.name);
+    });
+  });
+}
 //tutup simpan otomatis//
 
     function toggleUserDropdown() {

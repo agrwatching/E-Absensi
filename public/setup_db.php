@@ -40,7 +40,7 @@ try {
     $db->exec("
         CREATE TABLE IF NOT EXISTS mata_pelajaran (
             id_mapel INTEGER PRIMARY KEY AUTOINCREMENT,
-            nama_mapel TEXT NOT NULL
+            nama_mapel TEXT UNIQUE NOT NULL
         )
     ");
 
@@ -64,10 +64,10 @@ try {
     $db->exec("
         CREATE TABLE IF NOT EXISTS user (
             id_user INTEGER PRIMARY KEY AUTOINCREMENT,
-            nama_lengkap TEXT NOT NULL,
+            nama_lengkap TEXT,
             username TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
-            foto_profil TEXT NOT NULL
+            foto_profil TEXT
         )
     ");
 
