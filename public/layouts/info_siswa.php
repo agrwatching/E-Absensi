@@ -14,6 +14,12 @@ $kelasList = $kelasQuery->fetchAll(PDO::FETCH_ASSOC);
 <div class="p-6">
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-gray-800">📚 Daftar Siswa per Kelas</h2>
+        <a href="dashboard.php?page=SiswaController/naik_kelas"
+            onclick="return confirm('Proses kenaikan kelas akan memindahkan semua siswa:\n- 7A–C ke 8A–C\n- 8A–C ke 9A–C\n- 9A–C akan dihapus\n\nLanjutkan?')"
+            class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 text-sm">
+            🔁 Proses Kenaikan Kelas
+        </a>
+    </div>
 
         <!-- Dropdown filter kelas -->
         <div>
@@ -41,12 +47,19 @@ $kelasList = $kelasQuery->fetchAll(PDO::FETCH_ASSOC);
 
         <div class="kelas-section kelas_<?= $id_kelas ?> mb-10 bg-white p-5 rounded-xl shadow-md">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-semibold text-gray-700">Kelas <?= htmlspecialchars($nama_kelas) ?></h3>
-                <a href="dashboard.php?page=SiswaController/tambah_siswa&id_kelas=<?= $id_kelas ?>" 
-                class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm">
-                + Tambah Siswa
-                </a>
-            </div>
+    <h3 class="text-xl font-semibold text-gray-700">Kelas <?= htmlspecialchars($nama_kelas) ?></h3>
+    <div class="space-x-2">
+        <a href="dashboard.php?page=SiswaController/tambah_siswa&id_kelas=<?= $id_kelas ?>" 
+           class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm">
+            + Tambah Siswa
+        </a>
+        <a href="dashboard.php?page=SiswaController/tambah_banyak_siswa&id_kelas=<?= $id_kelas ?>" 
+           class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-sm">
+            + Tambah Banyak Siswa
+        </a>
+    </div>
+</div>
+
             <div class="overflow-x-auto">
                 <table id="<?= $safeTableId ?>" class="min-w-full text-sm text-left">
                     <thead class="bg-gray-100 text-gray-700">
