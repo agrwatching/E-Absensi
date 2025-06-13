@@ -1,5 +1,5 @@
 <div class="bg-white shadow-md rounded-2xl p-6 mb-8">
-    <h2 class="text-2xl font-bold mb-2">Selamat Datang, <?= htmlspecialchars($_SESSION['username']) ?>!</h2>
+    <h2 class="text-2xl font-bold mb-2">Selamat Datang, <?= htmlspecialchars($_SESSION['nama_lengkap']) ?>!</h2>
     <p class="text-gray-700">Ini adalah halaman utama dashboard admin. Gunakan navigasi di sebelah kiri untuk mengelola data user, siswa, serta absensi.</p>
 </div>
 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-8">

@@ -1,21 +1,41 @@
 <?php
 session_start();
+require_once(__DIR__ . '/../app/db.php');
 
+$id_user = $_SESSION['id_user'] ?? null;
+$fotoProfil = './img/user.png';
+
+if ($id_user) {
+  $stmt = $db->prepare("SELECT foto_profil FROM user WHERE id_user = ?");
+  $stmt->execute([$id_user]);
+  $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+  if (!empty($user['foto_profil'])) {
+    $fotoProfil = './uploads/' . $user['foto_profil'];
+  }
+}
+//untuk manggil nama lengkap di layouts/dashboard.php
+if (!isset($_SESSION['nama_lengkap']) && isset($_SESSION['id_user'])) {
+    $stmt = $db->prepare("SELECT * FROM user WHERE id_user = ?");
+    $stmt->execute([$_SESSION['id_user']]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    $_SESSION['nama_lengkap'] = $user['nama_lengkap'];
+}
 if (!isset($_SESSION['id_user'])) {
-    header('Location: index.php');
-    exit;
+  header('Location: index.php');
+  exit;
 }
 $currentPage = $_GET['page'] ?? 'home';
-        function isActive($targetPage, $currentPage)
-        {
-          return $targetPage === $currentPage
-            ? 'bg-white text-black border-l-4 border-blue-900 font-semibold'
-            : 'hover:bg-white hover:text-black hover:border-l-4 hover:border-blue-900';
-        }
-        function isParentOpen($pages, $currentPage)
-        {
-          return in_array($currentPage, $pages) ? '' : 'hidden';
-        }
+function isActive($targetPage, $currentPage)
+{
+  return $targetPage === $currentPage
+    ? 'bg-white text-black border-l-4 border-blue-900 font-semibold'
+    : 'hover:bg-white hover:text-black hover:border-l-4 hover:border-blue-900';
+}
+function isParentOpen($pages, $currentPage)
+{
+  return in_array($currentPage, $pages) ? '' : 'hidden';
+}
 ?>
 
 <!DOCTYPE html>
@@ -28,6 +48,7 @@ $currentPage = $_GET['page'] ?? 'home';
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="icon" type="image/png" href="./img/title.png">
 </head>
+
 <body class="h-screen flex flex-col transition-colors duration-300">
   <!-- Header -->
   <header class="flex items-center h-16 shadow">
@@ -44,7 +65,7 @@ $currentPage = $_GET['page'] ?? 'home';
     <div class="bg-emerald-500 h-full flex items-center px-6 relative">
       <button onclick="toggleUserDropdown()" id="userButton"
         class="flex items-center space-x-2 bg-blue-800 text-white px-4 py-2 rounded-full transition duration-300 ease-in-out hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <span class="text-lg">👤</span>
+        <img src="<?= htmlspecialchars($fotoProfil) ?>" alt="Foto Profil" class="w-6 h-6 rounded-full object-cover">
         <span class="font-medium"><?= htmlspecialchars($_SESSION['username']) ?></span>
         <svg id="arrowIcon" class="w-4 h-4 ml-1 transition-transform duration-300 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -74,22 +95,16 @@ $currentPage = $_GET['page'] ?? 'home';
 
       <!-- Menu navigasi -->
       <nav class="flex-1 text-sm space-y-1">
-        <?php
-        
-        ?>
-
         <a href="dashboard.php"
           class="flex items-center space-x-2 px-4 py-3 w-full border-b border-gray-800 <?= isActive('home', $currentPage) ?>">
           <span>🏠</span><span>Dashboard</span>
         </a>
-
-        <!-- Master Data -->
         <!-- Sidebar Menu -->
-<a href="dashboard.php?page=info_siswa" class="block px-6 py-3 w-full border-b border-gray-800 <?= isActive('info_siswa', $currentPage) ?>">🧑‍🎓 Info Siswa</a>
-<a href="dashboard.php?page=absensi" class="block px-6 py-3 w-full border-b border-gray-800 <?= isActive('absensi', $currentPage) ?>">📝 Absensi</a>
-<a href="dashboard.php?page=rekap_absensi" class="block px-6 py-3 w-full border-b border-gray-800 <?= isActive('rekap_absensi', $currentPage) ?>">📋 Rekap Absensi</a>
-<a href="dashboard.php?page=backup" class="block px-6 py-3 w-full border-b border-gray-800 <?= isActive('backup', $currentPage) ?>">📤 Backup data</a>
-<a href="dashboard.php?page=pengaturan" class="block px-6 py-3 w-full border-b border-gray-800 <?= isActive('pengaturan', $currentPage) ?>">⚙️ pengaturan</a>
+        <a href="dashboard.php?page=info_siswa" class="block px-6 py-3 w-full border-b border-gray-800 <?= isActive('info_siswa', $currentPage) ?>">🧑‍🎓 Info Siswa</a>
+        <a href="dashboard.php?page=absensi" class="block px-6 py-3 w-full border-b border-gray-800 <?= isActive('absensi', $currentPage) ?>">📝 Absensi</a>
+        <a href="dashboard.php?page=rekap_absensi" class="block px-6 py-3 w-full border-b border-gray-800 <?= isActive('rekap_absensi', $currentPage) ?>">📋 Rekap Absensi</a>
+        <a href="dashboard.php?page=backup" class="block px-6 py-3 w-full border-b border-gray-800 <?= isActive('backup', $currentPage) ?>">📤 Backup data</a>
+        <a href="dashboard.php?page=pengaturan" class="block px-6 py-3 w-full border-b border-gray-800 <?= isActive('pengaturan', $currentPage) ?>">⚙️ pengaturan</a>
       </nav>
     </aside>
 
@@ -104,40 +119,40 @@ $currentPage = $_GET['page'] ?? 'home';
 
         // Jika page mengandung slash (misalnya: "SiswaController/tambah_siswa")
         if (str_contains($page, '/')) {
-            $file = $page . ".php";
-            //hidupkan echo di bawah jika terjadi eror file tidak ditemukan untuk mengecek
-            // echo "<pre>Langsung CEK FILE: $file</pre>";
-            if (file_exists($file)) {
-                include $file;
-                $found = true;
-            } else {
-                echo "<pre>TIDAK DITEMUKAN</pre>";
-            }
+          $file = $page . ".php";
+          //hidupkan echo di bawah jika terjadi eror file tidak ditemukan untuk mengecek
+          // echo "<pre>Langsung CEK FILE: $file</pre>";
+          if (file_exists($file)) {
+            include $file;
+            $found = true;
+          } else {
+            echo "<pre>TIDAK DITEMUKAN</pre>";
+          }
         } else {
-            // Jika page cuma nama file biasa, cek di dalam folder yang diizinkan
-            $allowed_paths = [
-                'layouts/',
-                'SiswaController/',
-                'AbsensiController/',
-                'RekapAbsensiController/'
-            ];
+          // Jika page cuma nama file biasa, cek di dalam folder yang diizinkan
+          $allowed_paths = [
+            'layouts/',
+            'SiswaController/',
+            'AbsensiController/',
+            'RekapAbsensiController/'
+          ];
 
-            foreach ($allowed_paths as $path) {
-                $file = $path . ($page === 'home' ? 'dashboard' : $page) . ".php";
-                //hidupkan echo di bawah jika terjadi eror file tidak ditemukan untuk mengecek
-                // echo "<pre>CEK FILE: $file</pre>";
-                if (file_exists($file)) {
-                    include $file;
-                    $found = true;
-                    break;
-                } else {
-                    echo "<pre>TIDAK DITEMUKAN</pre>";
-                }
+          foreach ($allowed_paths as $path) {
+            $file = $path . ($page === 'home' ? 'dashboard' : $page) . ".php";
+            //hidupkan echo di bawah jika terjadi eror file tidak ditemukan untuk mengecek
+            // echo "<pre>CEK FILE: $file</pre>";
+            if (file_exists($file)) {
+              include $file;
+              $found = true;
+              break;
+            } else {
+              echo "<pre>TIDAK DITEMUKAN</pre>";
             }
+          }
         }
 
         if (!$found) {
-            echo "<h2 class='text-xl font-bold'>404 - Halaman tidak ditemukan</h2>";
+          echo "<h2 class='text-xl font-bold'>404 - Halaman tidak ditemukan</h2>";
         }
 
         ?>
@@ -147,46 +162,46 @@ $currentPage = $_GET['page'] ?? 'home';
   <?php include './copyright/footer.php'; ?>
   <!-- JS -->
   <script>
-// Cek mode malam dari localStorage
-window.addEventListener('DOMContentLoaded', () => {
-  if (localStorage.getItem('darkMode') === 'enabled') {
-    document.body.classList.remove('bg-gray-300');
-    document.body.classList.add('bg-black', 'text-black');
-  } else {
-    document.body.classList.remove('bg-black', 'text-black');
-    document.body.classList.add('bg-gray-300');
-  }
-});
-//mode malam
-
-// Simpan otomatis setiap kali pengguna mengetik
- const excludedPages = ["tambah_siswa", "edit_siswa", "tambah_kelas"];
-const currentPage = "<?= $_GET['page'] ?? '' ?>";
-const pageName = currentPage.split('/').pop(); // ambil bagian terakhir setelah slash
-
-if (!excludedPages.includes(pageName)) {
-  document.querySelectorAll('input, textarea, select').forEach(el => {
-    el.addEventListener('input', () => {
-      localStorage.setItem(el.name, el.value);
-    });
-  });
-
-  window.addEventListener('load', () => {
-    document.querySelectorAll('input, textarea, select').forEach(el => {
-      if (localStorage.getItem(el.name)) {
-        el.value = localStorage.getItem(el.name);
+    // Cek mode malam dari localStorage
+    window.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('darkMode') === 'enabled') {
+        document.body.classList.remove('bg-gray-300');
+        document.body.classList.add('bg-black', 'text-black');
+      } else {
+        document.body.classList.remove('bg-black', 'text-black');
+        document.body.classList.add('bg-gray-300');
       }
     });
-  });
-} else {
-  // Bersihkan isi localStorage yang tersimpan (jika perlu)
-  window.addEventListener('load', () => {
-    document.querySelectorAll('input, textarea, select').forEach(el => {
-      localStorage.removeItem(el.name);
-    });
-  });
-}
-//tutup simpan otomatis//
+    //mode malam
+
+    // Simpan otomatis setiap kali pengguna mengetik
+    const excludedPages = ["tambah_siswa", "edit_siswa", "tambah_kelas"];
+    const currentPage = "<?= $_GET['page'] ?? '' ?>";
+    const pageName = currentPage.split('/').pop(); // ambil bagian terakhir setelah slash
+
+    if (!excludedPages.includes(pageName)) {
+      document.querySelectorAll('input, textarea, select').forEach(el => {
+        el.addEventListener('input', () => {
+          localStorage.setItem(el.name, el.value);
+        });
+      });
+
+      window.addEventListener('load', () => {
+        document.querySelectorAll('input, textarea, select').forEach(el => {
+          if (localStorage.getItem(el.name)) {
+            el.value = localStorage.getItem(el.name);
+          }
+        });
+      });
+    } else {
+      // Bersihkan isi localStorage yang tersimpan (jika perlu)
+      window.addEventListener('load', () => {
+        document.querySelectorAll('input, textarea, select').forEach(el => {
+          localStorage.removeItem(el.name);
+        });
+      });
+    }
+    //tutup simpan otomatis//
 
     function toggleUserDropdown() {
       const dropdown = document.getElementById("dropdown");

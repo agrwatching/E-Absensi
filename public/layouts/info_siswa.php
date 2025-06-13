@@ -15,50 +15,52 @@ $kelasList = $kelasQuery->fetchAll(PDO::FETCH_ASSOC);
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-gray-800">📚 Daftar Siswa per Kelas</h2>
         <a href="dashboard.php?page=SiswaController/naik_kelas"
-            onclick="return confirm('Proses kenaikan kelas akan memindahkan semua siswa:\n- 7A–C ke 8A–C\n- 8A–C ke 9A–C\n- 9A–C akan dihapus\n\nLanjutkan?')"
-            class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 text-sm">
+           onclick="return confirm('Proses kenaikan kelas akan memindahkan semua siswa:\n- 7A-C ke 8A-C\n- 8A-C ke 9A-C\n- 9A-C akan dihapus\n\nLanjutkan?')"
+           class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 text-sm">
             🔁 Proses Kenaikan Kelas
         </a>
     </div>
 
-        <!-- Dropdown filter kelas -->
-        <div>
-            <label for="filterKelas" class="mr-2 text-sm text-gray-700">Filter Kelas:</label>
-            <select id="filterKelas" class="border border-gray-300 rounded px-3 py-1 text-sm">
-                <option value="all">Semua</option>
-                <?php foreach ($kelasList as $kelas): ?>
-                    <option value="kelas_<?= $kelas['id_kelas'] ?>"><?= htmlspecialchars($kelas['nama_kelas']) ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-    </div>
-
-    <?php foreach ($kelasList as $kelas): ?>
-        <?php
-        $id_kelas = $kelas['id_kelas'];
-        $nama_kelas = $kelas['nama_kelas'];
-        $safeTableId = 'tabel_' . preg_replace('/[^a-zA-Z0-9]/', '', $nama_kelas);
-
-        // Ambil siswa per kelas
-        $stmt = $db->prepare("SELECT * FROM siswa WHERE id_kelas = ? ORDER BY nama ASC");
-        $stmt->execute([$id_kelas]);
-        $siswaList = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        ?>
-
-        <div class="kelas-section kelas_<?= $id_kelas ?> mb-10 bg-white p-5 rounded-xl shadow-md">
-            <div class="flex justify-between items-center mb-4">
-    <h3 class="text-xl font-semibold text-gray-700">Kelas <?= htmlspecialchars($nama_kelas) ?></h3>
-    <div class="space-x-2">
-        <a href="dashboard.php?page=SiswaController/tambah_siswa&id_kelas=<?= $id_kelas ?>" 
-           class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm">
-            + Tambah Siswa
-        </a>
-        <a href="dashboard.php?page=SiswaController/tambah_banyak_siswa&id_kelas=<?= $id_kelas ?>" 
-           class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-sm">
-            + Tambah Banyak Siswa
-        </a>
+    <!-- Dropdown filter kelas -->
+    <div>
+        <label for="filterKelas" class="mr-2 text-sm text-gray-700">Filter Kelas:</label>
+        <select id="filterKelas" class="border border-gray-300 rounded px-3 py-1 text-sm">
+            <option value="all">Semua</option>
+            <?php foreach ($kelasList as $kelas): ?>
+                <option value="kelas_<?= $kelas['id_kelas'] ?>"><?= htmlspecialchars($kelas['nama_kelas']) ?></option>
+            <?php endforeach; ?>
+        </select>
     </div>
 </div>
+
+<?php foreach ($kelasList as $kelas): ?>
+    <?php
+    $id_kelas = $kelas['id_kelas'];
+    $nama_kelas = $kelas['nama_kelas'];
+    $safeTableId = 'tabel_' . preg_replace('/[^a-zA-Z0-9]/', '', $nama_kelas);
+
+    // Ambil siswa per kelas
+    $stmt = $db->prepare("SELECT * FROM siswa WHERE id_kelas = ? ORDER BY nama ASC");
+    $stmt->execute([$id_kelas]);
+    $siswaList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    ?>
+
+    <div class="kelas-section kelas_<?= $id_kelas ?> mb-10 bg-white p-5 rounded-xl shadow-md">
+        <form action="dashboard.php?page=SiswaController/hapus_banyak_siswa" method="POST" onsubmit="return confirm('Yakin ingin menghapus siswa yang dipilih?')">
+            <input type="hidden" name="id_kelas" value="<?= $id_kelas ?>">
+
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-gray-700">Kelas <?= htmlspecialchars($nama_kelas) ?></h3>
+                <div class="space-x-2 flex items-center">
+                    <a href="dashboard.php?page=SiswaController/tambah_siswa&id_kelas=<?= $id_kelas ?>" 
+                        class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm">+ Tambah Siswa</a>
+                    <a href="dashboard.php?page=SiswaController/tambah_banyak_siswa&id_kelas=<?= $id_kelas ?>" 
+                        class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-sm">+ Tambah Banyak Siswa</a>
+                    <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 text-sm">
+                        🗑️ Hapus yang Dipilih
+                    </button>
+                </div>
+            </div>
 
             <div class="overflow-x-auto">
                 <table id="<?= $safeTableId ?>" class="min-w-full text-sm text-left">
@@ -70,6 +72,7 @@ $kelasList = $kelasQuery->fetchAll(PDO::FETCH_ASSOC);
                             <th class="px-3 py-2">Nama</th>
                             <th class="px-3 py-2">Jenis Kelamin</th>
                             <th class="px-3 py-2">Aksi</th>
+                            <th class="px-3 py-2">Pilih</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -84,14 +87,17 @@ $kelasList = $kelasQuery->fetchAll(PDO::FETCH_ASSOC);
                                     <a href="dashboard.php?page=SiswaController/edit_siswa&id=<?= $siswa['id_siswa'] ?>">✏️ Edit</a>
                                     <a href="dashboard.php?page=SiswaController/hapus_siswa&id=<?= $siswa['id_siswa'] ?>" onclick="return confirm('Yakin ingin menghapus siswa ini?')">🗑️ Hapus</a>
                                 </td>
+                                <td class="px-3 py-2 text-center">
+                                    <input type="checkbox" name="id_siswa[]" value="<?= $siswa['id_siswa'] ?>">
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>
-        </div>
-    <?php endforeach; ?>
-</div>
+        </form>
+    </div>
+<?php endforeach; ?>
 
 <script>
     $(document).ready(function () {
