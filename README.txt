@@ -9,3 +9,6 @@
 📂 Database tersimpan di folder "data/absensidb.sqlite"
 
 ⛔ Jangan hapus file/folder penting di dalam aplikasi.
+
+
+kalo eror db driver tidak di temukan. cari di php ini extension_dir = "ext" setelah itu ganti ext contoh extension_dir = "C:\Users\watching\Documents\E-Absensi\php"

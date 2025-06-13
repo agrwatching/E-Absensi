@@ -14,13 +14,10 @@ $kelasList = $kelasQuery->fetchAll(PDO::FETCH_ASSOC);
 <div class="p-6">
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-gray-800">📚 Daftar Siswa per Kelas</h2>
-        <a href="dashboard.php?page=SiswaController/naik_kelas"
-           onclick="return confirm('Proses kenaikan kelas akan memindahkan semua siswa:\n- 7A-C ke 8A-C\n- 8A-C ke 9A-C\n- 9A-C akan dihapus\n\nLanjutkan?')"
-           class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 text-sm">
+        <button onclick="openModal()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 text-sm">
             🔁 Proses Kenaikan Kelas
-        </a>
+        </button>
     </div>
-
     <!-- Dropdown filter kelas -->
     <div>
         <label for="filterKelas" class="mr-2 text-sm text-gray-700">Filter Kelas:</label>
@@ -84,8 +81,8 @@ $kelasList = $kelasQuery->fetchAll(PDO::FETCH_ASSOC);
                                 <td class="px-3 py-2"><?= htmlspecialchars($siswa['nama']) ?></td>
                                 <td class="px-3 py-2"><?= $siswa['jenis_kelamin'] === 'L' ? 'Laki-laki' : 'Perempuan' ?></td>
                                 <td class="px-3 py-2 flex gap-2">
-                                    <a href="dashboard.php?page=SiswaController/edit_siswa&id=<?= $siswa['id_siswa'] ?>">✏️ Edit</a>
-                                    <a href="dashboard.php?page=SiswaController/hapus_siswa&id=<?= $siswa['id_siswa'] ?>" onclick="return confirm('Yakin ingin menghapus siswa ini?')">🗑️ Hapus</a>
+                                    <a href="dashboard.php?page=SiswaController/edit_siswa&id=<?= $siswa['id_siswa'] ?>">✏️ <span class="hover:underline">Edit</span></a>
+                                    <a href="dashboard.php?page=SiswaController/hapus_siswa&id=<?= $siswa['id_siswa'] ?>" onclick="return confirm('Yakin ingin menghapus siswa ini?')">🗑️<span class="hover:underline">Hapus</span></a>
                                 </td>
                                 <td class="px-3 py-2 text-center">
                                     <input type="checkbox" name="id_siswa[]" value="<?= $siswa['id_siswa'] ?>">
@@ -97,6 +94,42 @@ $kelasList = $kelasQuery->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </form>
     </div>
+   <!-- Modal Konfirmasi Naik Kelas -->
+<div id="modalNaikKelas" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-lg">
+        <h3 class="text-lg font-semibold mb-4 text-gray-800">Konfirmasi Kenaikan Kelas</h3>
+        <p class="text-sm text-gray-600 mb-3">
+            Apakah Anda benar ingin melanjutkan? <br />
+            <strong class="text-red-500">Data tidak akan bisa kembali!</strong>
+        </p>
+        <ul class="list-disc ml-5 mb-4 text-sm text-gray-600">
+            <li>Siswa kelas 7 akan dipindahkan ke kelas 8</li>
+            <li>Siswa kelas 8 akan dipindahkan ke kelas 9</li>
+            <li>Siswa kelas 9 akan <strong>dihapus permanen</strong></li>
+        </ul>
+
+        <!-- Checkbox Konfirmasi -->
+        <div class="flex items-start gap-2 mb-4">
+            <input type="checkbox" id="konfirmasiCheckbox" class="mt-1" />
+            <label for="konfirmasiCheckbox" class="text-sm text-gray-700">Saya yakin dan ingin melanjutkan proses ini</label>
+        </div>
+
+        <!-- Tombol Aksi -->
+        <div class="flex justify-end space-x-2">
+            <button onclick="closeModal()" class="px-4 py-2 bg-gray-200 rounded text-sm hover:bg-gray-300">
+                Batal
+            </button>
+            <form action="dashboard.php?page=SiswaController/naik_kelas" method="post">
+                <button type="submit" id="submitBtn" disabled
+                    class="px-4 py-2 bg-green-500 text-white rounded text-sm hover:bg-green-600">
+                    ✅ Proses Sekarang
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
 <?php endforeach; ?>
 
 <script>
@@ -119,4 +152,19 @@ $kelasList = $kelasQuery->fetchAll(PDO::FETCH_ASSOC);
             }
         });
     });
+
+    //modal centang
+function openModal() {
+        document.getElementById('modalNaikKelas').classList.remove('hidden');
+    }
+
+    function closeModal() {
+        document.getElementById('modalNaikKelas').classList.add('hidden');
+    }
+
+    // Aktifkan tombol saat checkbox dicentang
+    document.getElementById('konfirmasiCheckbox').addEventListener('change', function () {
+        document.getElementById('submitBtn').disabled = !this.checked;
+    });
+//tutup modal centang
 </script>

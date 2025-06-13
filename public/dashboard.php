@@ -5,6 +5,9 @@ require_once(__DIR__ . '/../app/db.php');
 $id_user = $_SESSION['id_user'] ?? null;
 $fotoProfil = './img/user.png';
 
+$stmt = $db->query("SELECT COUNT(*) AS total FROM siswa");
+$total_siswa = $stmt->fetch()['total'];
+
 if ($id_user) {
   $stmt = $db->prepare("SELECT foto_profil FROM user WHERE id_user = ?");
   $stmt->execute([$id_user]);
@@ -21,6 +24,8 @@ if (!isset($_SESSION['nama_lengkap']) && isset($_SESSION['id_user'])) {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     $_SESSION['nama_lengkap'] = $user['nama_lengkap'];
 }
+//tutup manggil nama lengkap di layouts/dashboard.php
+// Cek apakah pengguna sudah login
 if (!isset($_SESSION['id_user'])) {
   header('Location: index.php');
   exit;
@@ -74,7 +79,7 @@ function isParentOpen($pages, $currentPage)
       <div id="dropdown"
         class="origin-top-right absolute right-5 mt-36 w-36 bg-white rounded-xl shadow-xl z-20 hidden opacity-0 scale-95 transition-all duration-300 ease-out">
         <div class="py-2">
-          <a href="dashboard.php?page=profil" class="block px-4 py-2 text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition duration-200 <?= isActive('profil', $currentPage) ?>">👤 Profil</a>
+          <a href="dashboard.php?page=profil" class="block px-4 py-2 text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition duration-200 <?= isActive('profil', $currentPage) ?>">👨‍🏫 Profil</a>
           <form action="./logout.php" method="POST">
             <button type="submit" class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-100 hover:text-red-700 transition duration-200">
               🚪 Logout
@@ -100,7 +105,7 @@ function isParentOpen($pages, $currentPage)
           <span>🏠</span><span>Dashboard</span>
         </a>
         <!-- Sidebar Menu -->
-        <a href="dashboard.php?page=info_siswa" class="block px-6 py-3 w-full border-b border-gray-800 <?= isActive('info_siswa', $currentPage) ?>">🧑‍🎓 Info Siswa</a>
+        <a href="dashboard.php?page=info_siswa" class="block px-6 py-3 w-full border-b border-gray-800 <?= isActive('info_siswa', $currentPage) ?>">🎓 Info Siswa</a>
         <a href="dashboard.php?page=absensi" class="block px-6 py-3 w-full border-b border-gray-800 <?= isActive('absensi', $currentPage) ?>">📝 Absensi</a>
         <a href="dashboard.php?page=rekap_absensi" class="block px-6 py-3 w-full border-b border-gray-800 <?= isActive('rekap_absensi', $currentPage) ?>">📋 Rekap Absensi</a>
         <a href="dashboard.php?page=backup" class="block px-6 py-3 w-full border-b border-gray-800 <?= isActive('backup', $currentPage) ?>">📤 Backup data</a>
@@ -166,9 +171,9 @@ function isParentOpen($pages, $currentPage)
     window.addEventListener('DOMContentLoaded', () => {
       if (localStorage.getItem('darkMode') === 'enabled') {
         document.body.classList.remove('bg-gray-300');
-        document.body.classList.add('bg-black', 'text-black');
+        document.body.classList.add('bg-gray-900', 'text-black');
       } else {
-        document.body.classList.remove('bg-black', 'text-black');
+        document.body.classList.remove('bg-gray-900', 'text-black');
         document.body.classList.add('bg-gray-300');
       }
     });
